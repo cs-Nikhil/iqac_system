@@ -14,7 +14,7 @@ connectDB();
 const app = express();
 const allowedOriginList = (process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean)
-  : ["http://localhost:5173", "http://localhost:5174"]);
+  : ["https://iqac-system-mxyu.vercel.app", "http://localhost:5174"]);
 if (process.env.FRONTEND_URL) {
   allowedOriginList.push(String(process.env.FRONTEND_URL).trim());
 }
