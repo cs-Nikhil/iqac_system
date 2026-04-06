@@ -12,13 +12,23 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const allowedOriginList = (process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean)
-  : ["https://iqac-system-mxyu.vercel.app", "http://localhost:5174"]);
+const normalizeOrigin = (origin = "") => String(origin).trim().replace(/\/+$/, "");
+const defaultAllowedOrigins = [
+  "https://iqac-system-mxyu.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
+const allowedOriginList = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",")
+  : defaultAllowedOrigins;
 if (process.env.FRONTEND_URL) {
-  allowedOriginList.push(String(process.env.FRONTEND_URL).trim());
+  allowedOriginList.push(process.env.FRONTEND_URL);
 }
-const allowedOrigins = new Set(allowedOriginList.filter(Boolean));
+const allowedOrigins = new Set(
+  allowedOriginList
+    .map(normalizeOrigin)
+    .filter(Boolean)
+);
 const allowAllOrigins = allowedOrigins.has("*");
 
 // ==============================
@@ -32,17 +42,20 @@ app.use(cors({
       return callback(null, true);
     }
 
-    if (allowAllOrigins || allowedOrigins.has(origin)) {
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (allowAllOrigins || allowedOrigins.has(normalizedOrigin)) {
       return callback(null, true);
     }
 
-    return callback(new Error(`CORS blocked for origin: ${origin}`));
+    return callback(new Error(`CORS blocked for origin: ${normalizedOrigin}`));
   },
   credentials: true
 }));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 

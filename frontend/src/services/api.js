@@ -1,10 +1,15 @@
 import axios from 'axios';
 
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://iqac-system.onrender.com').replace(/\/$/, '');
-export const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
+const normalizeUrl = (value, fallback) => String(value || fallback).trim().replace(/\/+$/, '');
+
+export const BASE_URL = normalizeUrl(
+  import.meta.env.VITE_API_URL,
+  'https://iqac-system.onrender.com/api'
+);
+export const API_ORIGIN = BASE_URL.replace(/\/api$/, '');
 
 export const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
