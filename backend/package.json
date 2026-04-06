@@ -1,0 +1,35 @@
+{
+  "name": "iqac-backend",
+  "version": "1.0.0",
+  "description": "IQAC Student & Department Monitoring System - Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed:students": "node scripts/seedStudents.js",
+    "seed:marks": "node scripts/seedMarks.js",
+    "seed:placement": "node scripts/seedPlacement.js",
+    "reduce:research-citations": "node scripts/reduceResearchCitations.js",
+    "sync:research": "node scripts/syncResearchPaperReferences.js",
+    "sync:performance": "node scripts/syncStudentPerformance.js",
+    "seed:all": "node scripts/seedStudents.js",
+    "seed:full": "node scripts/seedStudents.js",
+    "seed:new-features": "node scripts/seedNewFeatures.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "docx": "^9.5.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "multer": "^2.1.1",
+    "pdfkit": "^0.15.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.3.1",
+    "nodemon": "^3.0.2"
+  }
+}
