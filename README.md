@@ -465,7 +465,9 @@ Use placeholder values only. Do not commit real credentials.
 
 | Variable | Example | Purpose |
 | --- | --- | --- |
-| `VITE_API_BASE_URL` | `http://localhost:5000/api` | Backend API base URL |
+| `VITE_API_URL` | `http://localhost:5000/api` | Backend API base URL |
+
+`VITE_API_BASE_URL` is still accepted as a backward-compatible alias, but `VITE_API_URL` is the canonical variable for new deployments.
 
 ## GitHub Readiness
 
@@ -480,7 +482,7 @@ Use placeholder values only. Do not commit real credentials.
 This repo supports two deployment styles:
 
 1. **Single service (recommended):** one Node service serves the API and the built frontend.
-2. **Split services:** deploy backend and frontend separately and connect via `VITE_API_BASE_URL`.
+2. **Split services:** deploy backend and frontend separately and connect via `VITE_API_URL`.
 
 ### Option A: Single Service on Render (Recommended)
 
@@ -508,8 +510,12 @@ docker run -p 5000:5000 --env-file backend/.env iqac-system
 
 ### Option C: Split Deploy (Vercel + Render/Any Backend Host)
 
-1. Deploy the backend and set `CORS_ORIGINS` to include your frontend domain.
-2. Deploy the frontend and set `VITE_API_BASE_URL` to your backend URL + `/api`.
+1. Deploy the backend and set:
+   - `FRONTEND_URL=https://iqac-system-mxyu.vercel.app`
+   - `CORS_ORIGINS=https://iqac-system-mxyu.vercel.app,http://localhost:5173,http://localhost:5174`
+2. Deploy the frontend and set:
+   - `VITE_API_URL=https://iqac-system.onrender.com/api`
+3. If your Vercel domain changes or you add a custom domain, add that exact origin to both `FRONTEND_URL` and `CORS_ORIGINS` before testing login.
 
 
 ## Sample Usage
