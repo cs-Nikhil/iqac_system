@@ -1,8 +1,11 @@
 import axios from 'axios';
-import { resolveApiBaseUrl, resolveApiOrigin } from '../config/apiBase.js';
+import { ensureApiBaseUrl } from '../config/apiBase.js';
 
-export const BASE_URL = resolveApiBaseUrl(import.meta.env);
-export const API_ORIGIN = resolveApiOrigin(import.meta.env);
+const configuredBaseUrl =
+  import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+
+export const BASE_URL = ensureApiBaseUrl(configuredBaseUrl);
+export const API_ORIGIN = BASE_URL.replace(/\/api$/i, '');
 
 export const api = axios.create({
   baseURL: BASE_URL,

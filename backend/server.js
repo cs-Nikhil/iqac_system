@@ -30,6 +30,9 @@ const allowedOrigins = new Set(
     .filter(Boolean)
 );
 const allowAllOrigins = allowedOrigins.has("*");
+const isAllowedVercelOrigin = (origin = "") => normalizeOrigin(origin).includes("vercel.app");
+const isAllowedLocalOrigin = (origin = "") =>
+  ["http://localhost:5173", "http://localhost:5174"].includes(normalizeOrigin(origin));
 
 // ==============================
 // Middleware
@@ -44,7 +47,12 @@ app.use(cors({
 
     const normalizedOrigin = normalizeOrigin(origin);
 
-    if (allowAllOrigins || allowedOrigins.has(normalizedOrigin)) {
+    if (
+      allowAllOrigins ||
+      allowedOrigins.has(normalizedOrigin) ||
+      isAllowedVercelOrigin(normalizedOrigin) ||
+      isAllowedLocalOrigin(normalizedOrigin)
+    ) {
       return callback(null, true);
     }
 
