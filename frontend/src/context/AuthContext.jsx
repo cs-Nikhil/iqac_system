@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/authService';
-import { normalizeAuthUser } from '../utils/roles';
+import { authService, normalizeAuthUser } from '../services/authService';
 
 const AuthContext = createContext(null);
 const readStoredUser = () => {

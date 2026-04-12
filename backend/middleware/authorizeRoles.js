@@ -1,4 +1,4 @@
-const { normalizeRole } = require("../utils/roles");
+const User = require("../models/User");
 
 /**
  * Role-based access control middleware
@@ -8,7 +8,7 @@ const { normalizeRole } = require("../utils/roles");
  */
 
 const authorizeRoles = (...allowedRoles) => {
-  const normalizedAllowedRoles = allowedRoles.map(normalizeRole);
+  const normalizedAllowedRoles = allowedRoles.map((role) => User.normalizeRole(role));
 
   return (req, res, next) => {
 
@@ -21,7 +21,7 @@ const authorizeRoles = (...allowedRoles) => {
     }
 
     // Check role permission
-    const normalizedUserRole = normalizeRole(req.user.role);
+    const normalizedUserRole = User.normalizeRole(req.user.role);
 
     if (normalizedUserRole) {
       req.user.role = normalizedUserRole;

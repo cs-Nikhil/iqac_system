@@ -1,8 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authService } from '../services/authService';
-import { normalizeRole } from '../utils/roles';
+import { authService, normalizeRole } from '../services/authService';
 
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user } = useAuth();
@@ -28,4 +27,3 @@ const ProtectedRoute = ({ children, roles = [] }) => {
 };
 
 export default ProtectedRoute;
-

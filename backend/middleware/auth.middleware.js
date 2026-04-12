@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { normalizeRole } = require("../utils/roles");
 
 const protect = async (req, res, next) => {
   try {
@@ -51,7 +50,7 @@ const protect = async (req, res, next) => {
       });
     }
 
-    const normalizedRole = normalizeRole(user.role);
+    const normalizedRole = User.normalizeRole(user.role);
     if (normalizedRole) {
       if (user.role !== normalizedRole) {
         User.updateOne({ _id: user._id }, { $set: { role: normalizedRole } }).catch(() => {});

@@ -1,12 +1,13 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Student = require("../models/Student");
-const { isSupportedRole, normalizeRole } = require("../utils/roles");
 
 const PUBLIC_ROLE = "student";
 const STAFF_ROLES = ["iqac_admin", "staff", "hod", "faculty"];
 const DEFAULT_STUDENT_LOGIN_PASSWORD =
   process.env.DEFAULT_STUDENT_LOGIN_PASSWORD || "Student@123";
+const normalizeRole = (role) => User.normalizeRole(role);
+const isSupportedRole = (role) => User.isSupportedRole(role);
 
 // ============================
 // Generate JWT Token

@@ -1,6 +1,50 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const { CANONICAL_ROLES, normalizeRole } = require("../utils/roles");
+
+const CANONICAL_ROLES = Object.freeze([
+  "iqac_admin",
+  "staff",
+  "hod",
+  "faculty",
+  "student",
+]);
+
+const ROLE_ALIAS_MAP = Object.freeze({
+  iqac_admin: "iqac_admin",
+  IQAC_ADMIN: "iqac_admin",
+  admin: "iqac_admin",
+  ADMIN: "iqac_admin",
+  iqac_head: "iqac_admin",
+  IQAC_HEAD: "iqac_admin",
+  staff: "staff",
+  STAFF: "staff",
+  hod: "hod",
+  HOD: "hod",
+  faculty: "faculty",
+  FACULTY: "faculty",
+  student: "student",
+  STUDENT: "student",
+});
+
+const normalizeRole = (role) => {
+  if (!role) {
+    return "";
+  }
+
+  const trimmedRole = String(role).trim();
+  if (!trimmedRole) {
+    return "";
+  }
+
+  const underscoredRole = trimmedRole.replace(/[\s-]+/g, "_");
+
+  return (
+    ROLE_ALIAS_MAP[trimmedRole] ||
+    ROLE_ALIAS_MAP[underscoredRole] ||
+    ROLE_ALIAS_MAP[underscoredRole.toLowerCase()] ||
+    trimmedRole.toLowerCase()
+  );
+};
 
 const userSchema = new mongoose.Schema(
 {
@@ -140,5 +184,10 @@ userSchema.methods.toJSON = function () {
 
 };
 
+userSchema.statics.normalizeRole = normalizeRole;
+userSchema.statics.isSupportedRole = (role) =>
+  CANONICAL_ROLES.includes(normalizeRole(role));
+
+userSchema.statics.CANONICAL_ROLES = CANONICAL_ROLES;
 
 module.exports = mongoose.model("User", userSchema);
