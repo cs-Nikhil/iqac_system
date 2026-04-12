@@ -13,26 +13,14 @@ connectDB();
 
 const app = express();
 const normalizeOrigin = (origin = "") => String(origin).trim().replace(/\/+$/, "");
-const defaultAllowedOrigins = [
-  "https://iqac-system-mxyu.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:5174",
-];
-const allowedOriginList = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(",")
-  : defaultAllowedOrigins;
+const allowedOriginList = (process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : ["http://localhost:5173", "http://localhost:5174"]);
 if (process.env.FRONTEND_URL) {
-  allowedOriginList.push(process.env.FRONTEND_URL);
+  allowedOriginList.push(String(process.env.FRONTEND_URL).trim());
 }
-const allowedOrigins = new Set(
-  allowedOriginList
-    .map(normalizeOrigin)
-    .filter(Boolean)
-);
+const allowedOrigins = new Set(allowedOriginList.map(normalizeOrigin).filter(Boolean));
 const allowAllOrigins = allowedOrigins.has("*");
-const isAllowedVercelOrigin = (origin = "") => normalizeOrigin(origin).includes("vercel.app");
-const isAllowedLocalOrigin = (origin = "") =>
-  ["http://localhost:5173", "http://localhost:5174"].includes(normalizeOrigin(origin));
 
 // ==============================
 // Middleware
@@ -47,12 +35,7 @@ app.use(cors({
 
     const normalizedOrigin = normalizeOrigin(origin);
 
-    if (
-      allowAllOrigins ||
-      allowedOrigins.has(normalizedOrigin) ||
-      isAllowedVercelOrigin(normalizedOrigin) ||
-      isAllowedLocalOrigin(normalizedOrigin)
-    ) {
+    if (allowAllOrigins || allowedOrigins.has(normalizedOrigin)) {
       return callback(null, true);
     }
 
@@ -161,10 +144,22 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("=================================");
   console.log("IQAC System Server running");
   console.log(`Port: ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
   console.log("=================================");
+});
+
+server.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is already in use. Stop the existing process or set a different PORT in backend/.env.`);
+  } else if (error.code === "EACCES") {
+    console.error(`Port ${PORT} requires elevated privileges or is not accessible.`);
+  } else {
+    console.error(`Server startup error: ${error.message}`);
+  }
+
+  process.exit(1);
 });

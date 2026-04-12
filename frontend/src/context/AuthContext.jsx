@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { normalizeAuthUser } from '../utils/roles';
 
 const AuthContext = createContext(null);
 const readStoredUser = () => {
   try {
     const storedUser = authService.getCurrentUser();
-    return storedUser && storedUser.role ? storedUser : null;
+    const normalizedUser = normalizeAuthUser(storedUser);
+    return normalizedUser && normalizedUser.role ? normalizedUser : null;
   } catch {
     return null;
   }
@@ -20,13 +22,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.login(email, password, role);
       if (response.success) {
-        const authData = {
+        const authData = normalizeAuthUser({
           id: response.data.id || response.data._id,
           name: response.data.name,
           email: response.data.email,
           role: response.data.role,
           department: response.data.department,
-        };
+        });
         localStorage.setItem('user', JSON.stringify(authData));
         setUser(authData);
         return { success: true, user: authData };

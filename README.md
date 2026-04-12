@@ -416,7 +416,7 @@ Available frontend scripts:
 - `npm run build`
 - `npm run preview`
 
-By default, Vite proxies `/api` to `http://localhost:5000` during development.
+By default, Vite proxies `/api` and `/uploads` to the backend port declared in `backend/.env`. With the example backend configuration in this repo, that resolves to `http://localhost:5500` during development.
 
 ### 3. Optional Python Utility
 
@@ -446,7 +446,7 @@ Use placeholder values only. Do not commit real credentials.
 
 | Variable | Example | Purpose |
 | --- | --- | --- |
-| `PORT` | `5000` | Backend server port |
+| `PORT` | `5500` | Backend server port |
 | `MONGO_URI` | `mongodb+srv://<user>:<password>@<cluster>/<db>` | MongoDB connection string |
 | `MONGO_DB_NAME` | `iqac_system` | Optional fallback database name for `app.py` |
 | `JWT_SECRET` | `replace-with-a-long-random-secret` | JWT signing secret |
@@ -465,9 +465,8 @@ Use placeholder values only. Do not commit real credentials.
 
 | Variable | Example | Purpose |
 | --- | --- | --- |
-| `VITE_API_URL` | `http://localhost:5000/api` | Backend API base URL |
-
-`VITE_API_BASE_URL` is still accepted as a backward-compatible alias, but `VITE_API_URL` is the canonical variable for new deployments.
+| `VITE_API_BASE_URL` | `/api` | Backend API base URL |
+| `VITE_API_PROXY_TARGET` | `http://localhost:5500` | Optional Vite dev proxy target override |
 
 ## GitHub Readiness
 
@@ -476,47 +475,6 @@ Use placeholder values only. Do not commit real credentials.
 - `backend/uploads/` is runtime-only content and should stay untracked.
 - `.github/workflows/ci.yml` provides a lightweight GitHub Actions check for frontend build and backend dependency installation.
 - If the credentials in your current local `.env` files were ever shared outside this machine, rotate them before publishing.
-
-## Deployment
-
-This repo supports two deployment styles:
-
-1. **Single service (recommended):** one Node service serves the API and the built frontend.
-2. **Split services:** deploy backend and frontend separately and connect via `VITE_API_URL`.
-
-### Option A: Single Service on Render (Recommended)
-
-This repo includes `render.yaml`, so you can deploy straight from GitHub.
-
-1. Push the repo to GitHub.
-2. In Render, choose **New** -> **Blueprint** and select your repo.
-3. Set required environment variables in Render:
-   - `MONGO_URI`
-   - `JWT_SECRET`
-   - `FRONTEND_URL` and `CORS_ORIGINS` (set to your Render URL, e.g. `https://<service>.onrender.com`)
-   - Optional: `GEMINI_API_KEY`
-
-Notes:
-- In production, `backend/server.js` will serve `frontend/dist` automatically when `NODE_ENV=production` (or `SERVE_FRONTEND=true`) and a frontend build is present.
-
-### Option B: Docker (Any Host)
-
-Build and run:
-
-```bash
-docker build -t iqac-system .
-docker run -p 5000:5000 --env-file backend/.env iqac-system
-```
-
-### Option C: Split Deploy (Vercel + Render/Any Backend Host)
-
-1. Deploy the backend and set:
-   - `FRONTEND_URL=https://iqac-system-mxyu.vercel.app`
-   - `CORS_ORIGINS=https://iqac-system-mxyu.vercel.app,http://localhost:5173,http://localhost:5174`
-2. Deploy the frontend and set:
-   - `VITE_API_URL=https://iqac-system.onrender.com/api`
-3. If your Vercel domain changes or you add a custom domain, add that exact origin to both `FRONTEND_URL` and `CORS_ORIGINS` before testing login.
-
 
 ## Sample Usage
 

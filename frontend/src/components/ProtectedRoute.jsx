@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import { normalizeRole } from '../utils/roles';
 
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user } = useAuth();
@@ -16,7 +17,10 @@ const ProtectedRoute = ({ children, roles = [] }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (roles.length > 0 && !roles.includes(activeUser?.role)) {
+  const normalizedUserRole = normalizeRole(activeUser?.role);
+  const normalizedRoles = roles.map(normalizeRole).filter(Boolean);
+
+  if (normalizedRoles.length > 0 && !normalizedRoles.includes(normalizedUserRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

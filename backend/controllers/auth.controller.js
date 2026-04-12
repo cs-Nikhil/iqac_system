@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Student = require("../models/Student");
+const { isSupportedRole, normalizeRole } = require("../utils/roles");
 
 const PUBLIC_ROLE = "student";
 const STAFF_ROLES = ["iqac_admin", "staff", "hod", "faculty"];
@@ -25,7 +26,7 @@ const buildUserResponse = (user) => ({
   id: user._id,
   name: user.name,
   email: user.email,
-  role: user.role,
+  role: normalizeRole(user.role),
   department: user.department,
 });
 
@@ -149,7 +150,8 @@ const provisionSeededStudentUser = async ({ email, password }) => {
     return null;
   }
 
-  const student = await Student.findOne({ email }).populate("department", "name code");
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const student = await Student.findOne({ email: normalizedEmail }).populate("department", "name code");
 
   if (!student) {
     return null;
@@ -189,28 +191,43 @@ const provisionSeededStudentUser = async ({ email, password }) => {
 const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedRole = normalizeRole(role);
 
-    if (!email || !password || !role) {
+    if (!normalizedEmail || !password || !normalizedRole) {
       return res.status(400).json({
         success: false,
         message: "Email, password and role are required"
       });
     }
 
+    if (!isSupportedRole(normalizedRole)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role selected"
+      });
+    }
+
     let user = await User
-      .findOne({ email, role })
+      .findOne({ email: normalizedEmail })
       .select("+password")
       .populate("department", "name code");
 
-    if (!user && role === PUBLIC_ROLE) {
-      user = await provisionSeededStudentUser({ email, password });
+    if (!user && normalizedRole === PUBLIC_ROLE) {
+      user = await provisionSeededStudentUser({ email: normalizedEmail, password });
     }
 
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user || normalizeRole(user.role) !== normalizedRole || !(await user.comparePassword(password))) {
       return res.status(401).json({
         success: false,
         message: "Invalid email, password or role"
       });
+    }
+
+    const persistedRole = String(user.role || "").trim();
+    if (persistedRole && persistedRole !== normalizedRole) {
+      user.role = normalizedRole;
+      User.updateOne({ _id: user._id }, { $set: { role: normalizedRole } }).catch(() => {});
     }
 
     if (!user.isActive) {

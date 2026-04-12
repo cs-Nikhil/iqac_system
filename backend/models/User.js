@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const { CANONICAL_ROLES, normalizeRole } = require("../utils/roles");
 
 const userSchema = new mongoose.Schema(
 {
@@ -27,8 +28,9 @@ const userSchema = new mongoose.Schema(
 
   role: {
     type: String,
-    enum: ["iqac_admin", "staff", "hod", "faculty", "student"],
-    default: "student"
+    enum: CANONICAL_ROLES,
+    default: "student",
+    set: normalizeRole
   },
 
   department: {
@@ -74,6 +76,9 @@ const userSchema = new mongoose.Schema(
 // Sync Account Status
 // ==============================
 userSchema.pre("validate", function (next) {
+  if (this.role) {
+    this.role = normalizeRole(this.role);
+  }
 
   if (this.isModified("status")) {
     this.isActive = this.status === "active";

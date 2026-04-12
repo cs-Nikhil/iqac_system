@@ -1,3 +1,5 @@
+const { normalizeRole } = require("../utils/roles");
+
 /**
  * Role-based access control middleware
  * Usage:
@@ -6,6 +8,7 @@
  */
 
 const authorizeRoles = (...allowedRoles) => {
+  const normalizedAllowedRoles = allowedRoles.map(normalizeRole);
 
   return (req, res, next) => {
 
@@ -18,7 +21,13 @@ const authorizeRoles = (...allowedRoles) => {
     }
 
     // Check role permission
-    if (!allowedRoles.includes(req.user.role)) {
+    const normalizedUserRole = normalizeRole(req.user.role);
+
+    if (normalizedUserRole) {
+      req.user.role = normalizedUserRole;
+    }
+
+    if (!normalizedAllowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: `Access denied. Role '${req.user.role}' is not allowed`
