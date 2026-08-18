@@ -1,8 +1,10 @@
   const mongoose = require('mongoose');
   const { faker } = require('@faker-js/faker');
+  const path = require('path');
   const dotenv = require('dotenv');
 
   dotenv.config();
+  dotenv.config({ path: path.join(__dirname, '../.env') });
 
   const Department = require('../models/Department');
   const Faculty = require('../models/Faculty');

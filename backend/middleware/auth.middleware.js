@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Student = require("../models/Student");
+const Faculty = require("../models/Faculty");
 
 const protect = async (req, res, next) => {
   try {
@@ -66,17 +68,22 @@ const protect = async (req, res, next) => {
     // Optional helper IDs for controllers
     switch (user.role) {
 
-      case "student":
-        req.user.studentId = user._id;
+      case "student": {
+        const studentProfile = await Student.findOne({
+          $or: [{ user: user._id }, { email: user.email }]
+        }).select("_id");
+        req.user.studentId = studentProfile ? studentProfile._id : user._id;
         break;
+      }
 
       case "faculty":
-        req.user.facultyId = user._id;
+      case "hod": {
+        const facultyProfile = await Faculty.findOne({
+          $or: [{ user: user._id }, { email: user.email }]
+        }).select("_id");
+        req.user.facultyId = facultyProfile ? facultyProfile._id : user._id;
         break;
-
-      case "hod":
-        req.user.facultyId = user._id;
-        break;
+      }
 
       default:
         break;

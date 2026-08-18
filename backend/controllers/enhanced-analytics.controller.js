@@ -166,7 +166,7 @@ const getPredictiveRiskAnalysis = async (req, res) => {
 
     // Calculate risk scores for each student
     const riskAnalysis = await Student.aggregate([
-      { $match: { department: mongoose.Types.ObjectId(departmentId), isActive: true } },
+      { $match: { department: new mongoose.Types.ObjectId(departmentId), isActive: true } },
       {
         $lookup: {
           from: 'marks',

@@ -21,7 +21,7 @@ const TREND_YEARS = Array.from(
 
 const academicYearStartExpression = {
   $toInt: {
-    $substrBytes: ["$academicYear", 0, 4]
+    $substrCP: [{ $toString: "$academicYear" }, 0, 4]
   }
 };
 

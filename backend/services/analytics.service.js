@@ -421,8 +421,8 @@ const getBacklogAnalysis = async (filters = {}) => {
   const matchStage = {};
   const pipeline = [];
 
-  if (filters.studentId) matchStage._id = mongoose.Types.ObjectId(filters.studentId);
-  if (filters.departmentId) matchStage.department = mongoose.Types.ObjectId(filters.departmentId);
+  if (filters.studentId) matchStage._id = resolveObjectId(filters.studentId);
+  if (filters.departmentId) matchStage.department = resolveObjectId(filters.departmentId);
 
   pipeline.push({ $match: matchStage });
 
@@ -622,7 +622,7 @@ const getDepartmentWiseStatistics = async (filters = {}) => {
  */
 const getCGPADistribution = async (filters = {}) => {
   const matchStage = {};
-  if (filters.departmentId) matchStage.department = mongoose.Types.ObjectId(filters.departmentId);
+  if (filters.departmentId) matchStage.department = resolveObjectId(filters.departmentId);
   if (filters.batchYear) matchStage.batchYear = parseInt(filters.batchYear);
 
   return await Student.aggregate([
@@ -666,7 +666,7 @@ const getCGPADistribution = async (filters = {}) => {
  */
 const getStudentPerformanceTrend = async (studentId) => {
   return await Marks.aggregate([
-    { $match: { student: mongoose.Types.ObjectId(studentId) } },
+    { $match: { student: resolveObjectId(studentId) } },
     {
       $lookup: {
         from: 'subjects',

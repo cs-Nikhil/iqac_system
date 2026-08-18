@@ -21,7 +21,7 @@ router.use(protect);
 // Backlog analysis
 router.get(
   "/backlog-analysis",
-  authorizeRoles("faculty", "hod"),
+  authorizeRoles("iqac_admin", "hod", "faculty", "staff"),
   getBacklogAnalysis
 );
 
@@ -35,49 +35,49 @@ router.get(
 // CGPA distribution
 router.get(
   "/cgpa-distribution",
-  authorizeRoles("iqac_admin", "faculty", "hod"),
+  authorizeRoles("iqac_admin", "hod", "faculty"),
   getCGPADistribution
 );
 
 // Student performance trend
 router.get(
   "/student-performance/:studentId",
-  authorizeRoles("iqac_admin", "hod", "faculty"),
+  authorizeRoles("iqac_admin", "hod", "faculty", "staff"),
   getStudentPerformanceTrend
 );
 
 // Faculty achievements analytics
 router.get(
   "/faculty-achievements",
-  authorizeRoles("faculty", "hod"),
+  authorizeRoles("iqac_admin", "hod", "faculty"),
   getFacultyAchievementsAnalytics
 );
 
 // Student participation statistics
 router.get(
   "/student-participation",
-  authorizeRoles("faculty", "hod"),
+  authorizeRoles("iqac_admin", "hod", "faculty", "staff"),
   getStudentParticipationStats
 );
 
 // Student progress report
 router.get(
   "/student-progress/:studentId",
-  authorizeRoles("iqac_admin", "hod", "faculty"),
+  authorizeRoles("iqac_admin", "hod", "faculty", "staff"),
   getStudentProgressReport
 );
 
 // Department comprehensive report
 router.get(
   "/department-comprehensive/:departmentId",
-  authorizeRoles("iqac_admin"),
+  authorizeRoles("iqac_admin", "hod"),
   getDepartmentComprehensiveReport
 );
 
 // Predictive risk analysis
 router.get(
   "/predictive-risk",
-  authorizeRoles("iqac_admin"),
+  authorizeRoles("iqac_admin", "hod"),
   getPredictiveRiskAnalysis
 );
 

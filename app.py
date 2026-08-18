@@ -72,9 +72,21 @@ app = FastAPI(title="IQAC MongoDB AI Query API (Atlas)")
 
 class QueryRequest(BaseModel):
     question: str
+    limit: int = 20
 
 
 def ensure_db():
+    global client, db
+    mongo_uri = os.getenv("IQAC_MONGO_URI") or os.getenv("MONGO_URI")
+    mongo_db_name = os.getenv("MONGO_DB_NAME", "iqac_system")
+    if db is None and mongo_uri:
+        client = MongoClient(mongo_uri)
+        try:
+            db = client.get_default_database()
+        except Exception:
+            db = None
+        if db is None:
+            db = client[mongo_db_name]
     if db is None:
         raise RuntimeError(
             "MONGO_URI is not configured. Set it in the environment or backend/.env before running app.py."
@@ -93,7 +105,7 @@ def get_collection_stats() -> Dict[str, int]:
 
 
 def parse_query(question: str, limit: int = 20) -> Dict[str, Any]:
-    q_lower = question.lower()
+    q_lower = question.lower().strip()
     coll_map = {
         "student": "students",
         "cgpa": "students",
@@ -124,19 +136,25 @@ def parse_query(question: str, limit: int = 20) -> Dict[str, Any]:
         filter_dict["isActive"] = True
 
     if not filter_dict:
-        filter_dict = {
-            "$or": [
-                {"name": {"$regex": re.sub(r"\W+", " ", q_lower), "$options": "i"}},
-                {"rollNumber": {"$regex": re.sub(r"\W+", " ", q_lower), "$options": "i"}},
-            ]
-        }
+        clean_q = re.sub(r"\W+", " ", q_lower).strip()
+        # If the user query is just asking for a collection category, don't restrict to name/rollNumber match
+        if clean_q in coll_map or clean_q in COLLECTIONS or clean_q in [c.rstrip("s") for c in COLLECTIONS]:
+            filter_dict = {}
+        else:
+            filter_dict = {
+                "$or": [
+                    {"name": {"$regex": clean_q, "$options": "i"}},
+                    {"rollNumber": {"$regex": clean_q, "$options": "i"}},
+                ]
+            }
 
     return {"collection": coll, "filter": filter_dict, "limit": limit}
 
 
 @app.post("/query")
 async def query_db(request: QueryRequest):
-    limit = request.dict().get("limit", 20) or 1000
+    req_data = request.model_dump() if hasattr(request, "model_dump") else request.dict()
+    limit = req_data.get("limit", 20) or 20
     parsed = parse_query(request.question, limit)
     try:
         database = ensure_db()

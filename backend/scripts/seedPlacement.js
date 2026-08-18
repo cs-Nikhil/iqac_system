@@ -35,8 +35,10 @@
 
 const mongoose = require('mongoose');
 const { faker }  = require('@faker-js/faker');
+const path       = require('path');
 const dotenv     = require('dotenv');
 dotenv.config();
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const Department         = require('../models/Department');
 const Student            = require('../models/Student');
@@ -352,6 +354,7 @@ function buildPlacementDrives(departments) {
       ),
       location:    faker.helpers.arrayElement(LOCATIONS),
       description: `${company} campus hiring drive – recruitment cycle ${index + 1}.`,
+      academicYear: faker.helpers.arrayElement(['2023-24', '2024-25']),
       departments: faker.helpers
         .arrayElements(departments, faker.number.int({ min: 1, max: 3 }))
         .map((d) => d._id),

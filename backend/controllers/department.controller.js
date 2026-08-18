@@ -231,7 +231,7 @@ const getDepartmentSummary = async (req, res) => {
           $addFields: {
             startYear: {
               $toInt: {
-                $substrBytes: ["$academicYear", 0, 4]
+                $substrCP: [{ $toString: "$academicYear" }, 0, 4]
               }
             }
           }

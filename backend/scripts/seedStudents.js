@@ -6,6 +6,7 @@ const { spawnSync } = require('child_process');
 const { faker } = require('@faker-js/faker');
 const dotenv = require('dotenv');
 dotenv.config();
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const Department = require('../models/Department');
 const Faculty = require('../models/Faculty');
@@ -318,8 +319,7 @@ const run = async () => {
       role: 'student',
     });
 
-    student.user = studentUser._id;
-    await student.save();
+    await Student.findByIdAndUpdate(student._id, { user: studentUser._id });
   }
 
   console.log('? Created demo student users (use seeded student emails / Student@123)');
@@ -367,8 +367,7 @@ const run = async () => {
       department: member.department,
     });
 
-    member.user = facultyUser._id;
-    await member.save();
+    await Faculty.findByIdAndUpdate(member._id, { user: facultyUser._id });
   }
 
   console.log('✅ Created Faculty users (for example: cse.faculty001@iqac.edu / Faculty@123)');
