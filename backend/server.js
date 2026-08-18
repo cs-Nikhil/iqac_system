@@ -35,7 +35,11 @@ app.use(cors({
 
     const normalizedOrigin = normalizeOrigin(origin);
 
-    if (allowAllOrigins || allowedOrigins.has(normalizedOrigin)) {
+    if (
+      allowAllOrigins ||
+      allowedOrigins.has(normalizedOrigin) ||
+      normalizedOrigin.endsWith(".vercel.app")
+    ) {
       return callback(null, true);
     }
 
